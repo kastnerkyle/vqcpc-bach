@@ -213,7 +213,7 @@ class VQCPCEncoderTrainer(EncoderTrainer):
             self.optimizer.zero_grad()
             if train:
                 loss.backward()
-                nn.utils.clip_grad_value_(self.parameters(), clip_value=5)
+                nn.utils.clip_grad_norm_(self.parameters(), max_norm=5)
                 self.optimizer.step()
             #########################
 
