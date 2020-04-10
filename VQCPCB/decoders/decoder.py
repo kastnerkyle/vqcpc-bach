@@ -361,7 +361,8 @@ class Decoder(nn.Module):
              generator_val,
              generator_test) = self.dataloader_generator.dataloaders(
                 batch_size=batch_size,
-                num_workers=num_workers)
+                num_workers=num_workers,
+                shuffle_val=True)
 
             monitored_quantities_train = self.epoch(
                 data_loader=generator_train,
