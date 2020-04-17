@@ -160,7 +160,7 @@ class VQCPCEncoderTrainer(EncoderTrainer):
                                                                          num_blocks)
 
             z_quantized_left, encoding_indices_left, quantization_loss_left = self.encoder(tensor_dict['x_left'],
-                                                                                           corrupt_labels=False)
+                                                                                           corrupt_labels=corrupt_labels)
             z_quantized_right, encoding_indices_right, quantization_loss_right = self.encoder(tensor_dict['x_right'],
                                                                                               corrupt_labels=False)
             # -- compute c

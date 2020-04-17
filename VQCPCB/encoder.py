@@ -169,9 +169,10 @@ class Encoder(nn.Module):
             random.shuffle(list_elements)
             # keep only a limited number of examples
             list_elements = list_elements[:50]
+            tensor_score = torch.cat(list_elements, dim=0)
             # to score
             tensor_score = self.data_processor.postprocess(original=None,
-                                                           reconstruction=list_elements)
+                                                           reconstruction=tensor_score)
             dataloader_generator.write(tensor_score, save_path)
 
             #

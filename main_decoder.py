@@ -23,8 +23,8 @@ def main(train,
          config,
          num_workers
          ):
-    overfitted = False
-    # overfitted = True
+    # overfitted = False
+    overfitted = True
     # Use all gpus available
     gpu_ids = [int(gpu) for gpu in range(torch.cuda.device_count())]
     print(f'Using GPUs {gpu_ids}')
@@ -115,7 +115,7 @@ def main(train,
 
     num_examples = 3
     for _ in range(num_examples):
-        scores = decoder.generate(temperature=1.,
+        scores = decoder.generate(temperature=0.9,
                                   top_p=0.8,
                                   top_k=0,
                                   batch_size=3,

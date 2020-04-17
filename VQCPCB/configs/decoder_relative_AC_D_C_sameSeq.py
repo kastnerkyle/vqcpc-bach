@@ -2,13 +2,17 @@ from pathlib import Path
 
 
 config = {
-    'config_encoder':              'models/encoder_sameSeq_config_2020-03-31_12-50-24/config.py',
+    # the legacy
+    # 'config_encoder':              'models/encoder_sameSeq_config_2020-04-10_17-25-49_bkp/config'
+    #                                '.py',
+    'config_encoder': 'models/encoder_sameSeq_config_2020-04-16_12-51-51/config'
+                      '.py',
     'training_method':             'decoder',
     'dataset':                     'bach',
 
     # --- Dataloader ---
     'dataloader_generator_kwargs': dict(
-        sequences_size=12
+        sequences_size=24
     ),  # Can be different from the encoder's data loader
 
     # --- DataProcessor ---
@@ -30,12 +34,12 @@ config = {
         num_decoder_layers=3,
         dim_feedforward=1024,
         positional_embedding_size=8,
-        dropout=0.1,
+        dropout=0.2,
     ),
     # ======== Training ========
     'lr':                          1e-4,
     'batch_size':                  16,
-    'num_batches':                 None,
+    'num_batches':                 256,
     'num_epochs':                  20000,
 
     # ======== model ID ========

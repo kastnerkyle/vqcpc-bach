@@ -120,7 +120,7 @@ class ProductVectorQuantizer(VectorQuantizer):
                                                       low=0, high=self.codebook_size)
                                    for _ in range(self.num_codebooks)
                                    ]
-            mask_list = [(torch.rand_like(random_indices.float()) > 0.05).long()
+            mask_list = [(torch.rand_like(random_indices.float()) > 0.02).long()
                          for random_indices in random_indices_list]
             encoding_indices_list = [mask * encoding_indices + (1 - mask) * random_indices
                                      for encoding_indices, random_indices, mask
