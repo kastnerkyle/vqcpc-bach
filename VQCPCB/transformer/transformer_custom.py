@@ -3,7 +3,6 @@ Overwrite pytorch transformer layers
 Only TransformerEncoder and TransformerDecoder need to be overwritten
 """
 
-
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -104,8 +103,10 @@ class TransformerCustom(Module):
         if src.size(2) != self.d_model or tgt.size(2) != self.d_model:
             raise RuntimeError("the feature number of src and tgt must be equal to d_model")
 
-        memory, attentions_encoder = self.encoder(src, mask=src_mask, src_key_padding_mask=src_key_padding_mask)
-        output, attentions_decoder = self.decoder(tgt, memory, tgt_mask=tgt_mask, memory_mask=memory_mask,
+        memory, attentions_encoder = self.encoder(src, mask=src_mask,
+                                                  src_key_padding_mask=src_key_padding_mask)
+        output, attentions_decoder = self.decoder(tgt, memory, tgt_mask=tgt_mask,
+                                                  memory_mask=memory_mask,
                                                   tgt_key_padding_mask=tgt_key_padding_mask,
                                                   memory_key_padding_mask=memory_key_padding_mask)
         return output, attentions_decoder, attentions_encoder
@@ -421,13 +422,17 @@ class TransformerAlignedDecoderLayerCustom(Module):
             num_events_q=num_events_decoder,
             dropout=dropout)
 
-        # self.cross_attn = nn.Linear(num_channels_encoder * d_model,
-        #                             d_model * num_channels_decoder)
-        self.cross_attn = nn.Sequential(
-            nn.Linear(num_channels_encoder * d_model, d_model * 2),
-            nn.ELU(),
-            nn.Linear(d_model * 2, d_model * num_channels_decoder)
-        )
+        self.cross_attn = nn.Linear(num_channels_encoder * d_model,
+                                    d_model * num_channels_decoder,
+                                    bias=False)
+
+        self.cross_alpha = nn.Linear(d_model, d_model, bias=False)
+        # self.cross_attn = nn.Sequential(
+        #     nn.Linear(num_channels_encoder * d_model, d_model * 2),
+        #     # nn.ELU(),
+        #     nn.ReLU(),
+        #     nn.Linear(d_model * 2, d_model * num_channels_decoder)
+        # )
         self.num_channels_encoder = num_channels_encoder
         self.num_channels_decoder = num_channels_decoder
         # Implementation of Feedforward model
@@ -477,8 +482,12 @@ class TransformerAlignedDecoderLayerCustom(Module):
         tgt2 = tgt2.permute(0, 3, 1, 2)
         tgt2 = tgt2.repeat_interleave(repeats=(tgt.size(0) // self.num_channels_decoder) //
                                               tgt2.size(0),
-                                     dim=0).reshape(tgt.size(0),
-                                                batch_size, d_model)
+                                      dim=0).reshape(tgt.size(0),
+                                                     batch_size, d_model)
+
+        # apply alpha
+        tgt2 = tgt2 * torch.sigmoid(self.cross_alpha(tgt))
+
         tgt = tgt + self.dropout2(tgt2)
         tgt = self.norm2(tgt)
         if hasattr(self, "activation"):
@@ -490,6 +499,7 @@ class TransformerAlignedDecoderLayerCustom(Module):
         attentions = dict(a_self_decoder=a_self,
                           a_cross=a_cross)
         return tgt, attentions
+
 
 def _get_activation_fn(activation):
     if activation == "relu":
