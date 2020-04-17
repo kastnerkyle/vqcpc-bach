@@ -278,7 +278,15 @@ class Decoder(nn.Module):
         return mask
 
     def _generate_anticausal_mask(self, sz):
-        return cuda_variable(self._generate_square_subsequent_mask(sz)).t()
+        mask = cuda_variable(self._generate_square_subsequent_mask(sz)).t()
+
+
+        # additional masking
+        # cmask = (torch.triu(torch.ones(sz - 4, sz - 4)) == 1).transpose(0, 1)
+        # cmask = cuda_variable(self._generate_square_subsequent_mask(sz - 4))
+        # mask[:-4, 4:] += cmask
+
+        return mask
 
     def _generate_causal_mask(self, sz):
         return cuda_variable(self._generate_square_subsequent_mask(sz))
@@ -534,8 +542,8 @@ class Decoder(nn.Module):
         )
 
         with torch.no_grad():
-            # tensor_dict = next(iter(generator_val))
-            tensor_dict = next(iter(generator_train))
+            tensor_dict = next(iter(generator_val))
+            # tensor_dict = next(iter(generator_train))
 
             x_original_single = tensor_dict['x']
             x_original = x_original_single.repeat(batch_size, 1, 1)
